@@ -97,7 +97,7 @@ if __name__ == "__main__":
                     serialized_buffers[param] = data
 
             if deployment is None:
-                edge_flow.from_source(source=".", entrypoint="edge_flow.py:edge_flow").deploy(
+                edge_flow.from_source(source="https://github.com/rafayahmed317/edge_implementation.git", entrypoint="edge_flow.py:edge_flow").deploy(
                     name="edge_anomaly_detection_pipeline",
                     parameters={"buffers": serialized_buffers},
                     work_pool_name="processor"
