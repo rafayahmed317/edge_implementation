@@ -54,7 +54,7 @@ def edge_flow_local(buffers):
 
 if __name__ == "__main__":
     data_dir = "S5P_Data_Exports/Palisades (2025-2026)/"
-    anomaly_detection_interval = 2
+    anomaly_detection_interval = 20
 
     sensors = {
         "aerosol": data_dir + "S5P_Aerosol_Stats_2025.csv",

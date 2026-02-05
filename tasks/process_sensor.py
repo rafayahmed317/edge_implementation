@@ -20,15 +20,14 @@ def process_sensor(parameter: str, samples: list[tuple[float, float]]):
     }
 
     # --- Create Artifact ---
-    markdown = f"""
-    ### Sensor Stats: {parameter.upper()}
-    | Metric | Value |
-    | :--- | :--- |
-    | Mean | {stats['mean_avg']:.4f} |
-    | Max Peak | {stats['max_peak']:.4f} |
-    | Min Trough | {stats['min_trough']:.4f} |
-    | Variance | {stats['daily_variance']:.4f} |
-    """
+    markdown = f"""### Sensor Stats: {parameter.upper()}
+| Metric | Value |
+| :--- | :--- |
+| Mean | {stats['mean_avg']:.4f} |
+| Max Peak | {stats['max_peak']:.4f} |
+| Min Trough | {stats['min_trough']:.4f} |
+| Variance | {stats['daily_variance']:.4f} |
+"""
     create_markdown_artifact(
         key=f"{parameter}-stats",
         markdown=markdown,
