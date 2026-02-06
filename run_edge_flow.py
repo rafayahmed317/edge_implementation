@@ -63,7 +63,7 @@ if __name__ == "__main__":
                     serialized_buffers[param] = data
 
             if deployment is None:
-                edge_flow.from_source(source=GIT_URL, entrypoint="edge_flow.py:edge_flow").deploy(
+                edge_flow.from_source(source=os.getcwd(), entrypoint="edge_flow.py:edge_flow").deploy(
                     name=DEPLOYMENT_NAME,
                     parameters={"buffers": serialized_buffers},
                     work_pool_name="processor"
