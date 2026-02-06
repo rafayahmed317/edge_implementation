@@ -49,13 +49,11 @@ def compute_sampling_rate(results: list):
         )
 
     tabular_data = "\n".join(artifact_rows)
-    sampling_md = f"""### Adaptive Sampling Strategy Report
+    sampling_md = f"""### Sampling Strategy (Adaptive Deadband Sampling) Report 
 | Sensor | Avg. Sampling Interval | Data Savings (vs Max Speed) |
 | :--- | :--- | :--- |
 {tabular_data}
 
-**Logic Applied:** * **Fast-Reset:** If 3-day volatility > {VAR_THRESHOLD}, interval drops to 24h.
-* **Gradual-Backoff:** If calm, interval increases +1hr/day up to 48h.
 """
     create_markdown_artifact(
         key="sampling-strategy",
