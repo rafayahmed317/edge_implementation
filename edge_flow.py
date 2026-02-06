@@ -1,21 +1,13 @@
 import time
 from multiprocessing import Manager, Process
 import os
-from pathlib import Path
 
 from prefect import flow
 from prefect.futures import wait
 from prefect.deployments import run_deployment
 
-####
-# from unittest.mock import MagicMock
-# import prefect.artifacts
-#
-# prefect.artifacts.create_markdown_artifact = MagicMock()
-####
-
 from tasks.process_sensor import process_sensor
-from tasks.detect_anomalies import detect_anomalies
+from tasks.detect_anomalies import detect_and_summarize_anomalies
 from tasks.compute_sampling_rate import compute_sampling_rate
 
 from ingestion.buffer import Buffer
@@ -33,7 +25,7 @@ def edge_flow(buffers):
     wait(futures)
     results = [f.result() for f in futures if f.state.is_completed()]
 
-    anomalies = detect_anomalies.submit(results)
+    anomalies = detect_and_summarize_anomalies.submit(results)
     sampling = compute_sampling_rate.submit(results)
 
     return {"anomalies": anomalies, "sampling": sampling}
@@ -46,7 +38,7 @@ def edge_flow_local(buffers):
             result = process_sensor.fn(name, data)
             results.append(result)
 
-    anomalies = detect_anomalies.fn(results)
+    anomalies = detect_and_summarize_anomalies.fn(results)
     sampling = compute_sampling_rate.fn(results)
 
     return {"anomalies": anomalies, "sampling": sampling}
@@ -56,14 +48,15 @@ if __name__ == "__main__":
     data_dir = "S5P_Data_Exports/Palisades (2025-2026)/"
     anomaly_detection_interval = 20
 
+    year = str(2025)
     sensors = {
-        "aerosol": data_dir + "S5P_Aerosol_Stats_2025.csv",
-        "no2": data_dir + "S5P_NO2_Stats_2025.csv",
-        "so2": data_dir + "S5P_SO2_Stats_2025.csv",
-        "co": data_dir + "S5P_CO_Stats_2025.csv",
-        "hcho": data_dir + "S5P_HCHO_Stats_2025.csv",
-        "o3": data_dir + "S5P_O3_Stats_2025.csv",
-        "ch4": data_dir + "S5P_CH4_Stats_2025.csv"
+        "aerosol": f"{data_dir}S5P_Aerosol_Stats_{year}.csv",
+        "no2": f"{data_dir}S5P_NO2_Stats_{year}.csv",
+        "so2": f"{data_dir}S5P_SO2_Stats_{year}.csv",
+        "co": f"{data_dir}S5P_CO_Stats_{year}.csv",
+        "hcho": f"{data_dir}S5P_HCHO_Stats_{year}.csv",
+        "o3": f"{data_dir}S5P_O3_Stats_{year}.csv",
+        "ch4": f"{data_dir}S5P_CH4_Stats_{year}.csv"
     }
     active_buffers = {}
 

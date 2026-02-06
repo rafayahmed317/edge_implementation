@@ -1,9 +1,11 @@
 from prefect import task
 from prefect.artifacts import create_markdown_artifact  # New import
 
-# Set min interval to a single day to match the interval of the mocked data, in real life, it would be around 1/60 (60 times in a second), representing the max speed of the sensor
+# Set min interval to a single day to match the interval of the mocked data, in real life, it would be around 1/60 (60 times in a second),
+# representing the max speed of the sensor
 MIN_INTERVAL = 24 * 60 * 60
-# Set max interval to 2 days to appear sensible with respect to the mocked data, in real life the value would be much, much lower, like around 60 seconds
+# Set max interval to 2 days to appear sensible with respect to the mocked data, in real life the value would be much, much lower,
+# like around 60 seconds
 MAX_INTERVAL = 2 * 24 * 60 * 60
 # The variance threshold on which to drop to maximum speed to not miss out on important data
 VAR_THRESHOLD = 0.3
@@ -49,7 +51,7 @@ def compute_sampling_rate(results: list):
         )
 
     tabular_data = "\n".join(artifact_rows)
-    sampling_md = f"""### Sampling Strategy (Adaptive Deadband Sampling) Report 
+    sampling_md = f"""### Sampling Strategy (Adaptive Dead-band Sampling) Report 
 | Sensor | Avg. Sampling Interval | Data Savings (vs Max Speed) |
 | :--- | :--- | :--- |
 {tabular_data}
