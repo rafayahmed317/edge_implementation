@@ -4,6 +4,9 @@ from prefect.artifacts import create_markdown_artifact  # New import
 import pandas as pd
 
 
+SPIKE_THRESHOLD = 9
+CLEAN_THRESHOLD = -5
+
 def emit_anomaly_markdown(events: list):
     if not events:
         md = "No cross-parameter anomaly events detected."
@@ -20,7 +23,7 @@ def emit_anomaly_markdown(events: list):
                 contributors = ", ".join(ev["contributors"])
                 desc = f"Spike event involving {contributors}"
             else:
-                desc = "Unusually clean air period"
+                desc = "Anomalously clean air"
 
             rows.append(
                 f"| {ev['event_type']} | {start} | {end} | {desc} |"
@@ -28,13 +31,29 @@ def emit_anomaly_markdown(events: list):
 
         table = "\n".join(rows)
 
+        note = cleandoc(f"""
+        ### Spike events and their probable causes : 
+
+        #### Group: NO<sup>2</sup>, CO and Aerosol
+        Causes:   Biomass burning + other types of fires
+
+        #### Group: NO<sup>2</sup> and SO<sup>2</sup>
+        Causes: High temperature combustion involving dirty/heavy fuels.
+
+        #### NO<sup>2</sup> alone:
+        Causes: Traffic exhaust.
+
+        #### SO<sup>2</sup> alone:
+        Causes: Burning of high-sulphur fuels mostly used by power plants and ships.
+        """)
+
         md = cleandoc(f"""
         ### Cross-Parameter Anomaly Report
-
         | Type | Start | End | Description |
         |------|--------|-----|-------------|
-        {table}
-        """)
+        """) + "\n" + table + "\n" + note
+
+        return md
 
     return md
 
@@ -110,22 +129,26 @@ def detect_and_summarize_anomalies(results: list):
         emit_anomaly_markdown([])
         return []
 
-    fire_indicators = ["aerosol", "co", "no2", "hcho"]
-    existing = [c for c in fire_indicators if c in pivot_df.columns]
+    pivot_df["event_intensity"] = pivot_df.sum(axis=1)
 
-    pivot_df["event_intensity"] = pivot_df[existing].sum(axis=1)
-
-    spike_days = sorted(pivot_df[pivot_df["event_intensity"] > 6].index)
-    clean_days = sorted(pivot_df[pivot_df["event_intensity"] < -5].index)
+    # This method of grouping discards non-significant days by only selecting days where one of the following happens:
+    # (i) Multiple pollutants spike together
+    # (ii) A single pollutant spikes significantly in a way that helps us point out the source with confidence.
+    # Aside from almost 50% of the year when nothing spikes, the rest of the year has insignificant spikes of individual pollutants which decrease
+    # confidence in their source. This helps us get rid of those.
+    spike_days = sorted(pivot_df[pivot_df["event_intensity"] > SPIKE_THRESHOLD].index)
+    clean_days = sorted(pivot_df[pivot_df["event_intensity"] < CLEAN_THRESHOLD].index)
 
     events = []
 
     # Spike Events
     for s, e in group_periods(spike_days):
+        # Get the complete period
         sub = pivot_df.loc[s:e]
 
+        # Select the parameters which caused this period to classify as spike period
         contributors = [
-            p for p in existing
+            p for p in pivot_df.drop("event_intensity", axis=1).columns
             if sub[p].mean() > 2
         ]
 
