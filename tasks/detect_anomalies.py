@@ -3,9 +3,12 @@ from prefect import task
 from prefect.artifacts import create_markdown_artifact  # New import
 import pandas as pd
 
-
 SPIKE_THRESHOLD = 9
 CLEAN_THRESHOLD = -5
+
+# Recommended is 3.5 and I found it to work quite nice in our pipeline as well. Anything
+ZCORE_THRESHOLD = 3.5
+
 
 def emit_anomaly_markdown(events: list):
     if not events:

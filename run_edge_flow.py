@@ -11,12 +11,11 @@ from ingestion.mock_sensor import MockSensor
 MOCK_DATA_DIR = "S5P_Data_Exports/Palisades (2025-2026)/"
 MOCK_DATA_YEAR = 2025
 # Set to lower values for slowing down ingestion, higher for making it faster
-MOCK_DATA_FREQ = 365
+MOCK_DATA_FREQ = 365 * 2  # ( Roughly processes each mock data file in about 0.5 seconds.)
 
 GIT_URL = "https://github.com/rafayahmed317/edge_implementation.git"
 DEPLOYMENT_NAME = "edge_anomaly_detection_pipeline"
 ANOMALY_DETECTION_INTERVAL = 20
-
 
 if __name__ == "__main__":
     data_dir = MOCK_DATA_DIR
@@ -70,5 +69,6 @@ if __name__ == "__main__":
                 )
                 deployment = True
 
-            result = run_deployment(name=f"edge_flow/{DEPLOYMENT_NAME}", parameters={"buffers": serialized_buffers})
-            print(result)
+            if len(serialized_buffers) != 0:
+                result = run_deployment(name=f"edge_flow/{DEPLOYMENT_NAME}", parameters={"buffers": serialized_buffers})
+                print(result)
