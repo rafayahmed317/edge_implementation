@@ -6,7 +6,7 @@ import pandas as pd
 SPIKE_THRESHOLD = 9
 CLEAN_THRESHOLD = -5
 
-# Recommended is 3.5 and I found it to work quite nice in our pipeline as well. Anything
+# Recommended is 3.5, and I found it to work quite nice in our pipeline as well.
 ZCORE_THRESHOLD = 3.5
 
 
@@ -97,8 +97,7 @@ def detect_and_summarize_anomalies(results: list):
 
         df["mod_zscore"] = (0.6745 * (df["avg"] - median)) / (mad + 1e-9)
 
-        threshold = 2
-        detected = df[df["mod_zscore"].abs() > threshold]
+        detected = df[df["mod_zscore"].abs() > ZCORE_THRESHOLD]
 
         for _, row in detected.iterrows():
             anomalies.append({
